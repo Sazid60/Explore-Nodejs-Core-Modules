@@ -478,3 +478,119 @@ writeStream.on("finish", () => {
   console.log("Writing Is Finish");
 });
 ```
+
+## 13-5 Making a basic logger app & Path module
+
+- so far we have learned IIFE. now we know how node.js uses IIFE and gives use access of some other method that are not present in global object.
+- We get `__dirName`, `module`, `module.export`, `require` etc.
+- We get another one named `process`. this gives us a lot of things in process. if we console it we can see.
+- Here is a magic inside process if we console `console.log(process.argv)`. this gives us an array and the array shows us the location of node executable file and the location of the file we are running.
+  ![alt text](image-5.png)
+- we are telling that go the file location and run the file using the exe file.
+- If we run this `node index.js Hello Shanda`. it will show array and also capture the two words
+
+![alt text](image-6.png)
+
+- suppose we do not want the path names we just want the words. we have to use slice method.
+
+```js
+const inputArguments = process.argv.slice(2);
+
+console.log(inputArguments);
+```
+
+![alt text](image-7.png)
+
+- we can bring them into single sentence using join
+
+```js
+const text = inputArguments.join(" ");
+console.log(text);
+```
+
+- If there is no input we have to close the server. using `process.exit(1)`
+
+```js
+if (!text) {
+  console.log(
+    "❌ Ballerina Kapuchina! Me me me me ! Please Provide a message To Log !"
+  );
+  console.log("Example : Node index.js Hellow World!");
+  process.exit(1);
+}
+```
+
+- now lets make a place for storing the data we have gave.
+
+```js
+const filePath = __dirname + "/log.txt";
+// D:\WORK\renew-level-2\PH-MODULES\Be-An-Express-And-Mongoose-Master\Explore-Nodejs-Core-Modules\codes\logger-app/log.txt
+// this will join the path thought there is wrong with "\" so we can use join.
+```
+
+- concat will join the path but there ie a problem with "\" so using `path.join` is better solution
+
+```js
+const path = require("path");
+const filePath = path.join(__dirname, "log.txt");
+
+console.log(filePath); // D:\WORK\renew-level-2\PH-MODULES\Be-An-Express-And-Mongoose-Master\Explore-Nodejs-Core-Modules\codes\logger-app\log.txt
+```
+
+- now place is created for storing the input values.
+- now we have to add the inputs with the existing data of log.txt file.
+- Asynchronously append data to a file, creating the file if it does not yet exist. data can be a string or a Buffer.
+
+![alt text](image-8.png)
+
+#### Final Version Of Logger
+
+```js
+const path = require("path");
+
+const fs = require("node:fs");
+
+console.log(process.argv);
+
+const inputArguments = process.argv.slice(2);
+
+console.log(inputArguments);
+
+const text = inputArguments.join(" ").concat("\n");
+
+const timeStamp = new Date().toString();
+
+console.log(timeStamp);
+
+const message = `${text} ${timeStamp} \n`;
+
+if (!message) {
+  console.log(
+    "❌ Ballerina Kapuchina! Me me me me ! Please Provide a message To Log"
+  );
+  console.log("Example : Node index.js Hellow World!");
+  process.exit(1);
+}
+console.log(message);
+
+// const filePath = __dirname + "/log.txt"
+// D:\WORK\renew-level-2\PH-MODULES\Be-An-Express-And-Mongoose-Master\Explore-Nodejs-Core-Modules\codes\logger-app/log.txt
+// this will join the path thought there is wrong with "\" so we can use join.
+// console.log(filePath)
+
+const filePath = path.join(__dirname, "log.txt");
+
+console.log(filePath); // D:\WORK\renew-level-2\PH-MODULES\Be-An-Express-And-Mongoose-Master\Explore-Nodejs-Core-Modules\codes\logger-app\log.txt
+
+fs.appendFile(filePath, message, { encoding: "utf-8" }, () => {
+  console.log("Your Log Added Successfully!");
+});
+```
+
+- input
+
+```
+ Node index.js Hellow World!"
+```
+
+## 13-6 Creating a todo app with basic http server using nodejs
