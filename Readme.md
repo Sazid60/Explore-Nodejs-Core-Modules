@@ -174,8 +174,88 @@ console.log("Task-4");
 console.log(data);
 ```
 
-#### Asynchronous File System `Write`
+#### Asynchronous File System
 
 - we can read data in `Asynchronous` way. This operation will happen in `Thread Pool`.File read --> single thread --> event loop --> thread pool --> finish task and send response
 
 - `readFile` works on asynchronous way by default.
+
+## 13-3 Asynchronous way to read and write files
+
+#### Asynchronous File System `Read`
+
+[Async Read](https://www.geeksforgeeks.org/node-js-fs-readfile-method/)
+
+```js
+fs.readFile(path, options, callback);
+```
+
+- As its asynchronous operation it will be solved by thread pool. so we need a callback here as well. Callback helps to send response of the complete task to user.
+
+![alt text](image-1.png)
+
+```js
+const fs = require("fs");
+
+fs.readFile("example.txt", "utf8", (err, data) => {
+  if (err) {
+    console.error("Error reading file:", err);
+    return;
+  }
+  console.log("File contents:", data);
+});
+```
+
+- This called error back pattern, if there is any error it will show the error.
+- now lets see our made asynchronous read example
+
+```js
+const fs = require("node:fs");
+let texts = "Default Text before set by callbacks";
+console.log("Asyn Task-1");
+
+fs.readFile("./hello.txt", { encoding: "utf8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  texts = data;
+  console.log(texts, "Text Inside Callback");
+});
+console.log(texts);
+console.log("Asyn Task-3");
+```
+
+#### Asynchronous File System `Write`
+
+[Write File Async](https://www.geeksforgeeks.org/node-js-fs-writefile-method/)
+
+```js
+fs.writeFile(file, data, options, callback);
+```
+
+- lets see wite and read of async
+
+```js
+let texts = "Default Text before set by callbacks";
+console.log("Asyn Task-1");
+
+fs.writeFile("./hello.txt", texts, { encoding: "utf-8" }, (err) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  console.log("Written Successfully!");
+});
+
+fs.readFile("./hello.txt", { encoding: "utf-8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  texts = data;
+  console.log(texts, "Text Inside Callback");
+});
+console.log(texts);
+console.log("Asyn Task-3");
+```
