@@ -104,7 +104,78 @@ schoolBell.emit("broken"); // One student reacts to the broken bell
 - Core Class: Built-in EventEmitter from events module handles all event-based ops.
 
 _Methods_:
-.emit('event') – Trigger an event
-.on('event', callback) – Listen for an event
-.removeListener() / .removeAllListeners() – Clean up listeners
-Async Support: Event handlers can be async for non-blocking behavior.
+
+- .emit('event') – Trigger an event
+- .on('event', callback) – Listen for an event
+- .removeListener() / .removeAllListeners() – Clean up listeners
+- Async Support: Event handlers can be async for non-blocking behavior.
+
+## 13-2 Synchronous way to read and write files
+
+- This file system means we can read the data from our machine where the files are stored.
+- We can also create new files in our machine and do data entry. And we can do update and delete the data.
+
+### Lets see how we can read the data from Machine using File system
+
+[Filesystem Of Node.js](https://nodejs.org/api/fs.html)
+
+- we can read data in `Synchronous` way. here we will tell node.js files system the file path and tell him to grab the data. This operation will happen in `Single Thread/ Main Thread` because the synchronous works are not sent in `thread pool`. An this will block the single thread until the task is finished.
+
+#### Synchronous File System `Read`
+
+[Read File sync Blog](https://www.geeksforgeeks.org/node-js-fs-readfilesync-method/)
+
+```js
+fs.readFileSync(path[, options])
+```
+
+- read file system
+
+```js
+const fs = require("node:fs");
+//  synchronous
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+// if we do not giv the option it will show buffer <Buffer 48 65 6c 6c 6f 20 49 20 61 6d 20 52 65 61 64 69 6e 67 20 54 68 65 20 74 65 78 74>
+console.log(data);
+```
+
+- it will grab the text from the `hello.txt` file and show.
+
+#### Synchronous File System `Write`
+
+```js
+fs.writeFileSync(file, data[, options])
+```
+
+![alt text](image.png)
+
+```js
+const fs = require("node:fs");
+
+const text = "Learning File System";
+fs.writeFileSync("./hello.txt", text);
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+console.log(data);
+```
+
+#### Now Lets Understand how its blocking other process.
+
+```js
+const fs = require("node:fs");
+
+console.log("Task-1");
+const text = "Learning File System";
+fs.writeFileSync("./hello.txt", text);
+
+console.log("Task-3");
+
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+console.log("Task-4");
+console.log(data);
+```
+
+#### Asynchronous File System `Write`
+
+- we can read data in `Asynchronous` way. This operation will happen in `Thread Pool`.File read --> single thread --> event loop --> thread pool --> finish task and send response
+
+- `readFile` works on asynchronous way by default.
