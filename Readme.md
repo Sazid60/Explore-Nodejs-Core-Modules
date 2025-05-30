@@ -104,7 +104,158 @@ schoolBell.emit("broken"); // One student reacts to the broken bell
 - Core Class: Built-in EventEmitter from events module handles all event-based ops.
 
 _Methods_:
-.emit('event') – Trigger an event
-.on('event', callback) – Listen for an event
-.removeListener() / .removeAllListeners() – Clean up listeners
-Async Support: Event handlers can be async for non-blocking behavior.
+
+- .emit('event') – Trigger an event
+- .on('event', callback) – Listen for an event
+- .removeListener() / .removeAllListeners() – Clean up listeners
+- Async Support: Event handlers can be async for non-blocking behavior.
+
+## 13-2 Synchronous way to read and write files
+
+- This file system means we can read the data from our machine where the files are stored.
+- We can also create new files in our machine and do data entry. And we can do update and delete the data.
+
+### Lets see how we can read the data from Machine using File system
+
+[Filesystem Of Node.js](https://nodejs.org/api/fs.html)
+
+- we can read data in `Synchronous` way. here we will tell node.js files system the file path and tell him to grab the data. This operation will happen in `Single Thread/ Main Thread` because the synchronous works are not sent in `thread pool`. An this will block the single thread until the task is finished.
+
+#### Synchronous File System `Read`
+
+[Read File sync Blog](https://www.geeksforgeeks.org/node-js-fs-readfilesync-method/)
+
+```js
+fs.readFileSync(path[, options])
+```
+
+- read file system
+
+```js
+const fs = require("node:fs");
+//  synchronous
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+// if we do not giv the option it will show buffer <Buffer 48 65 6c 6c 6f 20 49 20 61 6d 20 52 65 61 64 69 6e 67 20 54 68 65 20 74 65 78 74>
+console.log(data);
+```
+
+- it will grab the text from the `hello.txt` file and show.
+
+#### Synchronous File System `Write`
+
+```js
+fs.writeFileSync(file, data[, options])
+```
+
+![alt text](image.png)
+
+```js
+const fs = require("node:fs");
+
+const text = "Learning File System";
+fs.writeFileSync("./hello.txt", text);
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+console.log(data);
+```
+
+#### Now Lets Understand how its blocking other process.
+
+```js
+const fs = require("node:fs");
+
+console.log("Task-1");
+const text = "Learning File System";
+fs.writeFileSync("./hello.txt", text);
+
+console.log("Task-3");
+
+const data = fs.readFileSync("./hello.txt", { encoding: "utf8" });
+console.log("Task-4");
+console.log(data);
+```
+
+#### Asynchronous File System
+
+- we can read data in `Asynchronous` way. This operation will happen in `Thread Pool`.File read --> single thread --> event loop --> thread pool --> finish task and send response
+
+- `readFile` works on asynchronous way by default.
+
+## 13-3 Asynchronous way to read and write files
+
+#### Asynchronous File System `Read`
+
+[Async Read](https://www.geeksforgeeks.org/node-js-fs-readfile-method/)
+
+```js
+fs.readFile(path, options, callback);
+```
+
+- As its asynchronous operation it will be solved by thread pool. so we need a callback here as well. Callback helps to send response of the complete task to user.
+
+![alt text](image-1.png)
+
+```js
+const fs = require("fs");
+
+fs.readFile("example.txt", "utf8", (err, data) => {
+  if (err) {
+    console.error("Error reading file:", err);
+    return;
+  }
+  console.log("File contents:", data);
+});
+```
+
+- This called error back pattern, if there is any error it will show the error.
+- now lets see our made asynchronous read example
+
+```js
+const fs = require("node:fs");
+let texts = "Default Text before set by callbacks";
+console.log("Asyn Task-1");
+
+fs.readFile("./hello.txt", { encoding: "utf8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  texts = data;
+  console.log(texts, "Text Inside Callback");
+});
+console.log(texts);
+console.log("Asyn Task-3");
+```
+
+#### Asynchronous File System `Write`
+
+[Write File Async](https://www.geeksforgeeks.org/node-js-fs-writefile-method/)
+
+```js
+fs.writeFile(file, data, options, callback);
+```
+
+- lets see wite and read of async
+
+```js
+let texts = "Default Text before set by callbacks";
+console.log("Asyn Task-1");
+
+fs.writeFile("./hello.txt", texts, { encoding: "utf-8" }, (err) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  console.log("Written Successfully!");
+});
+
+fs.readFile("./hello.txt", { encoding: "utf-8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  texts = data;
+  console.log(texts, "Text Inside Callback");
+});
+console.log(texts);
+console.log("Asyn Task-3");
+```
