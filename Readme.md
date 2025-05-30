@@ -259,3 +259,222 @@ fs.readFile("./hello.txt", { encoding: "utf-8" }, (err, data) => {
 console.log(texts);
 console.log("Asyn Task-3");
 ```
+
+## 13-4 Buffer and Streaming
+
+- **Streaming :** Streaming is Process by using which we can transfer data from one place to another place.
+- **Buffer :** While doing streaming It is used to process a data piece by piece which is called buffer.
+
+#### Lets understand using an example
+
+- Think of it like a pizza. we are slicing one by one and then giving everyone one by one.
+- In youtube we have full data/ video. The full video is not loaded at a time since it will take time to show. They came up with a solution like they will divide the pizza in different pieces and then each piece comes to user end one by one. For this reason which pice has came its showing to us by this time other pieces gets loaded. User Gets smooth experience.
+
+#### Benefits of Streaming and Buffer.
+
+- Better In terms of User Experience
+- Needs short memory storage as it do not complete whole process at once. since ram memory is temporary and its short. some piece of data gets loaded and its kicked off and then other enters the temporary memory.
+
+#### Different Types Of Streams
+
+1. **Readable Stream :** a stream where we can read data (ex. http req, fs.readStream)
+2. **Writeable Stream :** a stream where we can Write data (ex. http response, fs.writeStream)
+3. **Duplex Stream :** a stream for both read and write.
+4. **Transform Stream :** a stream where we can reshape data.
+
+### Lets see stream and buffer in practical
+
+```js
+let texts = "Default Text before set by callbacks";
+console.log("Asyn Task-1");
+
+fs.writeFile("./hello.txt", texts, { encoding: "utf-8" }, (err) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  console.log("Written Successfully!");
+});
+
+fs.readFile("./hello.txt", { encoding: "utf-8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+  texts = data;
+  console.log(texts, "Text Inside Callback");
+});
+console.log(texts);
+console.log("Asyn Task-3");
+```
+
+- suppose we want this like we will read and immediately write. In this code case of asynchronous we can not take the data out of the block and cant store in variable. so we have to write inside callback
+
+- suppose we want to read the hello.txt data and make it duplicate and write inside hello-world.txt
+
+```js
+const fs = require("node:fs");
+
+fs.readFile("./hello.txt", { encoding: "utf-8" }, (err, data) => {
+  if (err) {
+    console.log("Opps!! Error Occurred.", err);
+    return;
+  }
+
+  fs.writeFile("./hello-world.txt", data, { encoding: "utf-8" }, (err) => {
+    if (err) {
+      console.log("Opps!! Error Occurred.", err);
+      return;
+    }
+    console.log("Written Successfully!");
+  });
+});
+```
+
+- Here first the file is read fully and then write is done. as the data is not that big so its not issue here. but if there is a lot of data there will be a problem since we will cost time. we know read speed is faster than write speed. This will create a back pressure for large data and creating imbalance.
+
+#### Here Streaming comes with a solution. read and write will be done in streaming format like duplex stream.
+
+[Files System Read Stream](https://nodejs.org/api/fs.html#filehandlecreatereadstreamoptions)
+
+[Blog Of Read Stream](https://www.geeksforgeeks.org/node-js-fs-createreadstream-method/)
+
+[Blog Of Write Stream](https://www.geeksforgeeks.org/node-js-fs-createwritestream-method/)
+
+```js
+fs.createReadStream(path, options);
+fs.createWriteStream(path, options);
+
+readStream.on();
+```
+
+```js
+const fs = require("node:fs");
+
+const readStream = fs.createReadStream("./hello.txt", { encoding: "utf-8" });
+const writeStream = fs.createWriteStream("./hello-world.txt", {
+  encoding: "utf-8",
+});
+
+// as we have created event we will need a listener for the event
+readStream.on("data");
+```
+
+- as we have created readStream event we will need a listener for the event
+- when were are reading the data readStream event will be triggered.
+- While we are loading data the readStream will listen and will show the loaded piece of data.
+
+  ![alt text](image-2.png)
+
+  ![alt text](image-4.png)
+
+- When the event is data there will be function named listener. this function will give us the data.
+
+  ![alt text](image-3.png)
+
+```js
+const fs = require("node:fs");
+
+const readStream = fs.createReadStream("./hello.txt", { encoding: "utf-8" });
+const writeStream = fs.createWriteStream("./hello-world.txt", {
+  encoding: "utf-8",
+});
+
+readStream.on("data", (data) => {
+  console.log(data);
+
+  writeStream.write(data, (err) => {
+    if (err) {
+      console.log("Opps!! Error Occurred.", err);
+      return;
+    }
+  });
+});
+```
+
+- here we are catching the error of write stream but we have nothing for catching the error of read stream.node.js have got us we can read stream and write stream error delicately.
+
+```js
+const fs = require("node:fs");
+
+const readStream = fs.createReadStream("./hello.txt", { encoding: "utf-8" });
+const writeStream = fs.createWriteStream("./hello-world.txt", {
+  encoding: "utf-8",
+});
+// readStream.on("eventName", callback);
+readStream.on("data", (data) => {
+  console.log(data);
+
+  writeStream.write(data, (err) => {
+    if (err) {
+      console.log("Opps!! Error Occurred.", err);
+      return;
+    }
+  });
+});
+
+readStream.on("error", (err) => {
+  if (err) {
+    throw Error("Error", err);
+  }
+});
+
+// we have checked the write error but we can also check here like this.
+writeStream.on("error", (err) => {
+  if (err) {
+    throw Error("Error", err);
+  }
+});
+```
+
+| **Event**        | **When it Happens**                                                  | **Callback Signature**      | **Description**                                                                |
+| ---------------- | -------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------ |
+| **`"data"`**     | When a chunk of data is available to read                            | `(chunk: string \| Buffer)` | Emitted multiple times as data is streamed                                     |
+| **`"end"`**      | When there is no more data to read                                   | `() => void`                | Indicates the stream has finished reading                                      |
+| **`"error"`**    | When an error occurs while reading or writing                        | `(err: Error) => void`      | Always listen for this to avoid uncaught exceptions                            |
+| **`"close"`**    | When the stream and underlying file descriptor are closed            | `() => void`                | Emitted after `end`, when stream is completely cleaned up                      |
+| **`"open"`**     | When the file descriptor is successfully opened                      | `(fd: number) => void`      | Useful for tracking access to the file descriptor                              |
+| **`"pause"`**    | When the readable stream is paused                                   | `() => void`                | Happens after calling `.pause()`                                               |
+| **`"resume"`**   | When the readable stream is resumed after being paused               | `() => void`                | Happens after calling `.resume()`                                              |
+| **`"readable"`** | When a readable stream has data available for manual `.read()` calls | `() => void`                | Allows for manually reading data in a loop                                     |
+| **`"ready"`**    | When the stream is ready for use                                     | `() => void`                | Emitted only once, before any data events                                      |
+| **`"drain"`**    | When the write buffer becomes empty                                  | `() => void`                | Used in write streams to handle backpressure (after `.write()` returned false) |
+| **`"finish"`**   | When all data has been flushed from the write stream                 | `() => void`                | Emitted after `.end()` is called                                               |
+| **`"pipe"`**     | When a readable stream is piped into a writable stream               | `(src: Readable) => void`   | Indicates piping has started                                                   |
+| **`"unpipe"`**   | When a readable stream is unpiped from a writable stream             | `(src: Readable) => void`   | Emitted when `.unpipe()` is called                                             |
+
+- Now we want to show a success message while completed the write stream.
+
+```js
+const fs = require("node:fs");
+
+const readStream = fs.createReadStream("./hello.txt", { encoding: "utf-8" });
+const writeStream = fs.createWriteStream("./hello-world.txt", {
+  encoding: "utf-8",
+});
+readStream.on("data", (data) => {
+  console.log(data);
+
+  writeStream.write(data, (err) => {
+    if (err) {
+      console.log("Opps!! Error Occurred.", err);
+      return;
+    }
+  });
+});
+
+readStream.on("error", (err) => {
+  if (err) {
+    throw Error("Error", err);
+  }
+});
+
+readStream.on("end", () => {
+  console.log("Reading Ended");
+  writeStream.end();
+});
+
+writeStream.on("finish", () => {
+  console.log("Writing Is Finish");
+});
+```
