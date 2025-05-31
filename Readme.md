@@ -648,3 +648,49 @@ const server = http.createServer((req, res) => {
 
 - These will show all the details of the request and response having.
 - We will use some of them like `res.end`, `req.headers`
+
+## 13-7 Routing In Node.js
+
+- lets see what important thing we get from request and response.
+
+```js
+const server = http.createServer((req, res) => {
+  // console.log({ req, res })
+
+  console.log(req.url, req.method);
+  res.end("Welcome To Server");
+});
+```
+
+- Output
+
+```
+/todos/update-todo
+PATCH
+```
+
+#### Now Lets Define The Routes
+
+1. /todos - Get - All Todos
+2. /todos/create-todo - Post - create Todo
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  // console.log({ req, res })
+
+  if (req.url === "/todos" && req.method === "GET") {
+    res.end("All Todos Here");
+  }
+  if (req.url === "/todos/create-todo" && req.method === "POST") {
+    res.end("Todo Created");
+  } else {
+    res.end("Route Not Found");
+  }
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Server Is Listening");
+});
+```
