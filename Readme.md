@@ -594,3 +594,57 @@ fs.appendFile(filePath, message, { encoding: "utf-8" }, () => {
 ```
 
 ## 13-6 Creating a todo app with basic http server using nodejs
+
+- Lets create a server using node.js. For creating server we must connect with our machine network. and this connection is done using node.js `HTTP` Module.
+
+[HTTP Module](https://nodejs.org/api/http.html)
+
+```js
+http.createServer([options][, requestListener])
+```
+
+[http module createServer](https://nodejs.org/api/http.html#httpcreateserveroptions-requestlistener)
+
+- Here we call http and give a callback function inside. This callback function handles request and response.
+
+```js
+const http = require("node:http");
+
+// Create a local server to receive data from
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      data: "Hello World!",
+    })
+  );
+});
+
+server.listen(8000);
+```
+
+- lest create this server for our to do app.
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.end("Welcome To Server");
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Server Is Listening");
+});
+```
+
+- we can console.log the request and response. we will get after postman hit
+
+```js
+const server = http.createServer((req, res) => {
+  console.log({ req, res });
+  res.end("Welcome To Server");
+});
+```
+
+- These will show all the details of the request and response having.
+- We will use some of them like `res.end`, `req.headers`
