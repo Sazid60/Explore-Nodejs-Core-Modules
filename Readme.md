@@ -594,3 +594,103 @@ fs.appendFile(filePath, message, { encoding: "utf-8" }, () => {
 ```
 
 ## 13-6 Creating a todo app with basic http server using nodejs
+
+- Lets create a server using node.js. For creating server we must connect with our machine network. and this connection is done using node.js `HTTP` Module.
+
+[HTTP Module](https://nodejs.org/api/http.html)
+
+```js
+http.createServer([options][, requestListener])
+```
+
+[http module createServer](https://nodejs.org/api/http.html#httpcreateserveroptions-requestlistener)
+
+- Here we call http and give a callback function inside. This callback function handles request and response.
+
+```js
+const http = require("node:http");
+
+// Create a local server to receive data from
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      data: "Hello World!",
+    })
+  );
+});
+
+server.listen(8000);
+```
+
+- lest create this server for our to do app.
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.end("Welcome To Server");
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Server Is Listening");
+});
+```
+
+- we can console.log the request and response. we will get after postman hit
+
+```js
+const server = http.createServer((req, res) => {
+  console.log({ req, res });
+  res.end("Welcome To Server");
+});
+```
+
+- These will show all the details of the request and response having.
+- We will use some of them like `res.end`, `req.headers`
+
+## 13-7 Routing In Node.js
+
+- lets see what important thing we get from request and response.
+
+```js
+const server = http.createServer((req, res) => {
+  // console.log({ req, res })
+
+  console.log(req.url, req.method);
+  res.end("Welcome To Server");
+});
+```
+
+- Output
+
+```
+/todos/update-todo
+PATCH
+```
+
+#### Now Lets Define The Routes
+
+1. /todos - Get - All Todos
+2. /todos/create-todo - Post - create Todo
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  // console.log({ req, res })
+
+  if (req.url === "/todos" && req.method === "GET") {
+    res.end("All Todos Here");
+  }
+  if (req.url === "/todos/create-todo" && req.method === "POST") {
+    res.end("Todo Created");
+  } else {
+    res.end("Route Not Found");
+  }
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Server Is Listening");
+});
+```
