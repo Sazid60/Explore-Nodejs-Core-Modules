@@ -694,3 +694,90 @@ server.listen(5000, "127.0.0.1", () => {
   console.log("Server Is Listening");
 });
 ```
+
+## 13-8 Set response headers
+
+- When a request is sent then the server sends a response.
+- While sending the response we can send some meta data.
+- What is meta data? It means what will be the content type like json, or plain text or html.
+
+##### Writing Inside Headers
+
+- We can send response status as well. For this we need to use `res.writeHead()`. this means we are trying to write the headers.
+
+```js
+if (req.url === "/todos" && req.method === "GET") {
+  res.writeHead(200, {
+    "content-type": "text/plain",
+    email: "ph@gmail.com",
+  });
+
+  res.end("All Todos ");
+}
+```
+
+![alt text](image-9.png)
+
+- we can write the header in different was as well using `res.setHeader()`. but the writeHead is much cleaner.
+
+```js
+if (req.url === "/todos" && req.method === "GET") {
+  // res.writeHead(200, {
+  //     "content-type": "text/plain",
+  //     "email": "ph@gmail.com"
+  // })
+  res.statusCode = 200;
+  res.setHeader("content-type", "text/plain");
+  res.setHeader("email", "ph@gmail.com");
+  res.end("All Todos ");
+}
+```
+
+- Now Lets see how we will handle json data inside header
+
+```js
+const http = require("http");
+
+const data = [
+  {
+    title: "Morning Routines",
+    body: "Boost your day with simple habits.",
+    createdAt: "2025-05-30T08:45:00Z",
+  },
+  {
+    title: "AI in Life",
+    body: "How AI is changing everything.",
+    createdAt: "2025-05-29T17:20:00Z",
+  },
+];
+
+const server = http.createServer((req, res) => {
+  if (req.url === "/todos" && req.method === "GET") {
+    res.writeHead(200, {
+      "content-type": "application/json",
+    });
+    res.end(JSON.stringify(data));
+  } else {
+    res.end("Route Not Found");
+  }
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Server Is Listening");
+});
+```
+
+- We can send html as well inside header.
+
+```js
+if (req.url === "/todos" && req.method === "GET") {
+  res.writeHead(200, {
+    "content-type": "text/html",
+  });
+  res.end(`<h1> Hello I am HTmL</h1>`);
+}
+```
+
+- now we will use file system instead of fake data
+
+##
